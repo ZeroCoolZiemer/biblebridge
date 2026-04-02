@@ -1,0 +1,41 @@
+# BibleBridge Standalone — Clean URL Routing
+# RewriteBase is auto-configured during setup
+
+RewriteEngine On
+RewriteBase /
+
+# Don't rewrite existing files or directories
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Reading plans
+RewriteRule ^plans/([^/]+)/day/([0-9]+)/?$ plans/day.php?slug=$1&day=$2 [L,QSA]
+RewriteRule ^plans/([^/]+)/?$ plans/plan.php?slug=$1 [L,QSA]
+RewriteRule ^plans/?$ plans/index.php [L]
+
+# Topics
+RewriteRule ^topics/?$ topic-explorer.php [L]
+RewriteRule ^topics/([^/]+)/?$ topic-explorer.php?slug=$1 [L,QSA]
+
+# Bible reader
+RewriteRule ^read/?$ index.php [L]
+RewriteRule ^read/search$ search.php [L,QSA]
+RewriteRule ^read/([^/]+)/([0-9]+)/([0-9]+)/?$ read.php?book=$1&chapter=$2&verse=$3 [L,QSA]
+RewriteRule ^read/([^/]+)/([0-9]+)/?$ read.php?book=$1&chapter=$2 [L,QSA]
+RewriteRule ^read/([^/]+)/?$ read.php?book=$1&chapter=1 [L,QSA]
+
+# Setup & Settings
+RewriteRule ^setup/?$ setup.php [L]
+RewriteRule ^settings/?$ settings.php [L]
+
+# Map /reader/ paths used by shared CDN JS
+RewriteRule ^reader/xref\.php$ xref.php [L,QSA]
+RewriteRule ^reader/sync\.php$ sync.php [L,QSA]
+
+# API endpoints
+RewriteRule ^api/xref$ xref.php [L,QSA]
+RewriteRule ^api/suggest$ search-suggest.php [L,QSA]
+RewriteRule ^api/topic-next$ topic-next.php [L,QSA]
+RewriteRule ^api/topic$ topic.php [L,QSA]
+RewriteRule ^api/sync$ sync.php [L,QSA]
