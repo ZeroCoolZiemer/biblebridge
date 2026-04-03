@@ -42,6 +42,17 @@ $maxChapter    = $max_chapters[$bookId];
 $chapter       = min($chapter, $maxChapter);
 
 // -----------------------------------------------------------
+// Full-page cache + IP throttling (protects shared hosts from bots)
+// -----------------------------------------------------------
+require_once __DIR__ . '/lib/page-cache.php';
+$_bbCachedHtml = bb_page_cache_check($canonicalSlug, $chapter, $version, $parallel);
+if ($_bbCachedHtml !== false) {
+    echo $_bbCachedHtml;
+    exit;
+}
+ob_start(); // capture output for caching
+
+// -----------------------------------------------------------
 // Fetch verses from API
 // -----------------------------------------------------------
 $verses = bb_api_chapter($bookId, $chapter, $version);
@@ -378,6 +389,30 @@ foreach ($displayBooks as $id => $name) {
     })();
 </script>
 <?php $bottomNavActive = 'read'; include __DIR__ . '/bottom-nav.php'; ?>
+<?php
+// Signed beacon — no raw API key exposed in page source
+$_bbSlot = floor(time() / 600); // 10-minute window
+$_bbChapterKey = $canonicalSlug . '-' . $chapter;
+$_bbPayload = $bbInstall['site_domain'] . '|' . $_bbChapterKey . '|' . $_bbSlot;
+$_bbSig = hash_hmac('sha256', $_bbPayload, $bbInstall['api_key']);
+?>
+<script>
+(function(){
+    if (typeof navigator.sendBeacon !== 'function') return;
+    var sid = sessionStorage.getItem('bb_sid');
+    if (!sid) { sid = Math.random().toString(36).substr(2,12) + Date.now().toString(36); sessionStorage.setItem('bb_sid', sid); }
+    navigator.sendBeacon(<?= json_encode(rtrim($bbInstall['api_url'], '/') . '/reader-session') ?>,
+        JSON.stringify({site:<?= json_encode($bbInstall['site_domain']) ?>,chapter:<?= json_encode($_bbChapterKey) ?>,translation:<?= json_encode($version) ?>,slot:<?= $_bbSlot ?>,sig:<?= json_encode($_bbSig) ?>,session:sid})
+    );
+})();
+</script>
 <script src="<?= $bbBaseUrl ?>/assets/reader.min.js?v=20260401"></script>
 </body>
 </html>
+<?php
+// Write rendered page to disk cache (only if we got verses — don't cache errors)
+$_bbRenderedHtml = ob_get_flush();
+if (!empty($verses)) {
+    bb_page_cache_write($canonicalSlug, $chapter, $version, $parallel, $_bbRenderedHtml);
+}
+?>

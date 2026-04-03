@@ -7,6 +7,46 @@
  */
 
 /**
+ * Detect if the current request is from a real browser (not a bot/crawler).
+ * Used to generate a human-verification token so only real page views count
+ * toward the site's daily API quota.
+ */
+function bb_is_human_request(): bool
+{
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    if ($ua === '') return false;
+
+    // Common bot patterns
+    $botPatterns = [
+        'bot', 'crawl', 'spider', 'slurp', 'wget', 'curl',
+        'python', 'java/', 'httpclient', 'fetcher', 'scraper',
+        'headless', 'phantom', 'lighthouse', 'pagespeed',
+        'semrush', 'ahrefs', 'mj12bot', 'dotbot', 'petalbot',
+        'yandex', 'baiduspider', 'duckduck', 'facebookexternal',
+        'twitterbot', 'linkedinbot', 'whatsapp', 'telegram',
+        'applebot', 'ia_archiver', 'archive.org',
+    ];
+
+    $uaLower = strtolower($ua);
+    foreach ($botPatterns as $pattern) {
+        if (str_contains($uaLower, $pattern)) return false;
+    }
+
+    return true;
+}
+
+/**
+ * Generate the human-verification token for API requests.
+ * Token = HMAC-SHA256(today's date, api_key).
+ * API only counts quota when this token is present and valid.
+ */
+function bb_human_token(): string
+{
+    global $bbInstall;
+    return hash_hmac('sha256', date('Y-m-d'), $bbInstall['api_key']);
+}
+
+/**
  * Make a GET request to the BibleBridge API.
  *
  * @param string $endpoint  e.g. '/scripture', '/cross-references', '/topics'
@@ -22,10 +62,17 @@ function bb_api_get(string $endpoint, array $params = []): ?array
         $url .= '?' . http_build_query($params);
     }
 
+    $headers = "X-API-Key: {$bbInstall['api_key']}\r\nAccept: application/json\r\n";
+
+    // Only send human token for real browser requests — bots get served but don't burn quota
+    if (bb_is_human_request()) {
+        $headers .= "X-BB-Human: " . bb_human_token() . "\r\n";
+    }
+
     $ctx = stream_context_create([
         'http' => [
             'method'  => 'GET',
-            'header'  => "X-API-Key: {$bbInstall['api_key']}\r\nAccept: application/json\r\n",
+            'header'  => $headers,
             'timeout' => 8,
             'ignore_errors' => true,
         ],

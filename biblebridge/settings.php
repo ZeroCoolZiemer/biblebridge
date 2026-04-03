@@ -311,6 +311,7 @@ var baseUrl = <?= json_encode($bbBaseUrl) ?>;
                 return;
             }
 
+            window._bbZipUrl = d.zip_url || '';
             var html = '<div class="update-current">Installed: <strong>v' + bbVersion + '</strong><span class="update-badge">v' + latest + ' available</span></div>';
             if (d.changelog) {
                 html += '<div class="update-changelog">' + escHtml(d.changelog) + '</div>';
@@ -344,8 +345,12 @@ function applyUpdate() {
     btn.textContent = 'Updating...';
     progress.textContent = 'Downloading and applying update — do not close this page.';
 
+    var body = new FormData();
+    body.append('zip_url', window._bbZipUrl || 'https://holybible.dev/standalone-build/download.php');
+
     fetch(baseUrl + '/update.php?token=' + encodeURIComponent(adminToken), {
-        method: 'POST'
+        method: 'POST',
+        body: body
     })
     .then(function(r) { return r.json(); })
     .then(function(d) {

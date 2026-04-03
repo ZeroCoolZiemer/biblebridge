@@ -1,0 +1,4 @@
+config.local.php
+.installed
+cache/
+plans/progress/

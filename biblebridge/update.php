@@ -195,6 +195,15 @@ if (is_dir($backupProgress)) {
     }
 }
 
+// cache/ — page cache is regenerated automatically, but preserve the directory
+// so permissions are retained on restrictive hosts
+$backupCache = $backupDir . '/cache';
+if (is_dir($backupCache)) {
+    $cacheDir = __DIR__ . '/cache';
+    if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
+    // Don't copy cached files — they'll regenerate. Just ensure dir exists.
+}
+
 // ── Step 7: Verify the update didn't break config.php ─────────
 
 $newConfigContent = @file_get_contents(__DIR__ . '/config.php');
