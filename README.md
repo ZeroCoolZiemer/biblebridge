@@ -6,7 +6,7 @@ Try it risk-free in under a minute. Upload the zip, visit `/setup`, type a name,
 
 You can have your Bible website live before you finish your cup of coffee.
 
-[Live Demo](https://holybible.dev/read) · [Download](https://holybible.dev/pricing)
+[Live Demo](https://holybible.dev/read) · [Download](https://holybible.dev/pricing) · [Install Guide](https://holybible.dev/blog/add-bible-to-church-website)
 
 ![BibleBridge Reader](./screenshot.png)
 
