@@ -81,12 +81,19 @@ The full Bible website installs in under 1 MB.
 2. Upload the folder to your web host
 
 **Then:**
-3. Visit `yoursite.com/biblebridge/setup` — type a name and you're done
-4. Your Bible website is live
+3. Upload into its own folder on your host (e.g. `yoursite.com/biblebridge/`) — don't merge it into your site root
+4. Visit `yoursite.com/biblebridge/setup` — type a name and you're done
+5. Your Bible website is live
 
 Everything connects automatically — no signup, no API keys, no configuration. When your church grows, upgrade for higher limits.
 
-Works on shared hosting that supports PHP 7.4+, mod_rewrite, and outbound HTTPS. No database required.
+### Requirements
+
+- PHP 7.4+
+- `mbstring` extension (most hosts have this — a polyfill is included as fallback)
+- `mod_rewrite` (Apache) or equivalent URL rewriting
+- Outbound HTTPS allowed
+- No database required
 
 ## FAQ
 
@@ -101,14 +108,20 @@ The free plan covers most small churches and personal sites. If your site grows,
 
 ## Troubleshooting
 
+**`/setup` returns 404?**
+Your host doesn't have `mod_rewrite` enabled. Try visiting `yoursite.com/biblebridge/setup.php` directly instead. If that works, ask your host to enable URL rewriting.
+
 **Blank page after install?**
 Check that your PHP version is 7.4+. Check your host's error log for details.
+
+**`mbstring` error on install?**
+A polyfill is bundled as a fallback, but enabling the native `mbstring` PHP extension is recommended. Most hosts have it — check your control panel or ask support.
 
 **Search not working?**
 Make sure your server can make outbound HTTPS requests. Some hosts block this by default.
 
-**Pages return 404?**
-BibleBridge needs mod_rewrite (Apache) or equivalent URL rewriting enabled.
+**Pages return 404 after the homepage loads?**
+BibleBridge needs `mod_rewrite` (Apache) or equivalent URL rewriting enabled.
 
 **Moved to a different folder?**
 Clear your browser cache. Old links may still point to the previous location.
