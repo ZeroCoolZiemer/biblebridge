@@ -359,46 +359,23 @@
     vasBackdrop.className = 'vas-backdrop';
     vasSheet.className    = 'verse-action-sheet';
     vasSheet.setAttribute('aria-hidden', 'true');
+    // Sheet shell only — action buttons are injected from VERSE_ACTIONS registry
+    // (see bottom of file). vasCancel is the insertion anchor.
     vasSheet.innerHTML =
         '<div class="vas-ref" id="vasRef"></div>' +
-        '<button class="vas-action-btn" id="vasCopy">' + COPY_SVG  + ' Copy Verse</button>' +
-        '<button class="vas-action-btn" id="vasShare">' + SHARE_SVG + ' Share Verse</button>' +
-        '<button class="vas-action-btn" id="vasImage">' + IMAGE_SVG + ' Share as Image</button>' +
         '<button class="vas-action-btn vas-cancel" id="vasCancel">Cancel</button>';
     document.body.appendChild(vasBackdrop);
     document.body.appendChild(vasSheet);
 
-    var vasRef      = document.getElementById('vasRef');
-    var vasCopyBtn  = document.getElementById('vasCopy');
-    var vasShareBtn = document.getElementById('vasShare');
-    var vasImageBtn = document.getElementById('vasImage');
-    var vasCancel   = document.getElementById('vasCancel');
+    var vasRef    = document.getElementById('vasRef');
+    var vasCancel = document.getElementById('vasCancel');
 
     var _vasActiveVerse = null;
 
     function openVasSheet(el) {
         _vasActiveVerse = el;
-        var verseNum = el.dataset.verse;
-        if (vasRef) vasRef.textContent = getVerseRef(verseNum);
-        vasCopyBtn.onclick = function () {
-            copyText(getVerseText(el) + '\n— ' + getVerseRef(verseNum));
-            closeVasSheet();
-        };
-        vasShareBtn.onclick = function () {
-            var text = '"' + getVerseText(el) + '"\n— ' + getVerseRef(verseNum);
-            var url  = getVerseUrl(verseNum);
-            if (navigator.share) {
-                navigator.share({ title: getVerseRef(verseNum), text: text, url: url }).catch(function(){});
-                closeVasSheet();
-            } else {
-                copyText(text + '\n' + url);
-                closeVasSheet();
-            }
-        };
-        vasImageBtn.onclick = function () {
-            shareVerseImage(el);
-            closeVasSheet();
-        };
+        if (vasRef) vasRef.textContent = getVerseRef(el.dataset.verse);
+        if (typeof refreshVerseActionsState === 'function') refreshVerseActionsState(el);
         vasSheet.classList.add('open');
         vasSheet.removeAttribute('aria-hidden');
         vasBackdrop.classList.add('open');
@@ -440,55 +417,13 @@
 
     document.querySelectorAll('.verse').forEach(function (el) {
 
-        // Inject hover action buttons (CSS hides these on touch devices)
-        var actions  = document.createElement('span');
+        // Empty action container — buttons are populated from VERSE_ACTIONS
+        // registry at the bottom of this file. This keeps hover/touch wiring
+        // below independent of the action list.
+        var actions = document.createElement('span');
         actions.className = 'verse-actions';
         actions.setAttribute('aria-hidden', 'true');
-
-        var copyBtn  = document.createElement('button');
-        copyBtn.className = 'va-btn va-copy';
-        copyBtn.title = 'Copy verse';
-        copyBtn.innerHTML = COPY_SVG;
-
-        var shareBtn = document.createElement('button');
-        shareBtn.className = 'va-btn va-share';
-        shareBtn.title = 'Copy share link';
-        shareBtn.innerHTML = SHARE_SVG;
-
-        var imgBtn = document.createElement('button');
-        imgBtn.className = 'va-btn va-image';
-        imgBtn.title = 'Share as image';
-        imgBtn.innerHTML = IMAGE_SVG;
-
-        actions.appendChild(copyBtn);
-        actions.appendChild(shareBtn);
-        actions.appendChild(imgBtn);
         el.appendChild(actions);
-
-        copyBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            copyText(getVerseText(el) + '\n— ' + getVerseRef(el.dataset.verse));
-            flashDone(copyBtn, COPY_SVG);
-        });
-
-        shareBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            var vn = el.dataset.verse;
-            var text = '"' + getVerseText(el) + '"\n— ' + getVerseRef(vn);
-            var url  = getVerseUrl(vn);
-            if (navigator.share) {
-                navigator.share({ title: getVerseRef(vn), text: text, url: url }).catch(function(){});
-            } else {
-                copyText(text + '\n' + url);
-            }
-            flashDone(shareBtn, SHARE_SVG);
-        });
-
-        imgBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            shareVerseImage(el);
-            flashDone(imgBtn, IMAGE_SVG);
-        });
 
         // Verse hover: re-show icons if they auto-dismissed, reset timer on leave
         el.addEventListener('mouseenter', function () {
@@ -899,44 +834,8 @@
         updateBkHeaderBtn();
     }());
 
-    // Add bookmark button to each verse's action strip
-    document.querySelectorAll('.verse').forEach(function (el) {
-        var actions = el.querySelector('.verse-actions');
-        if (!actions || typeof READER_BOOK === 'undefined') return;
-        var btn = document.createElement('button');
-        btn.className = 'va-btn va-bookmark';
-        btn.title = 'Bookmark verse';
-        var alreadySaved = el.classList.contains('verse-bookmarked');
-        btn.innerHTML = alreadySaved ? BK_FILLED_SVG : BK_EMPTY_SVG;
-        if (alreadySaved) btn.title = 'Remove bookmark';
-        actions.appendChild(btn);
-
-        btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            var verseNum = el.dataset.verse;
-            var key = bkKey(verseNum);
-            var bms = loadBookmarks();
-            var idx = bms.findIndex(function (b) { return b.key === key; });
-            if (idx > -1) {
-                bms.splice(idx, 1);
-                el.classList.remove('verse-bookmarked');
-                btn.innerHTML = BK_EMPTY_SVG;
-                btn.title = 'Bookmark verse';
-            } else {
-                bms.unshift({
-                    key: key,
-                    ref: getVerseRef(verseNum),
-                    text: getVerseText(el),
-                    url: getVerseUrl(verseNum)
-                });
-                el.classList.add('verse-bookmarked');
-                btn.innerHTML = BK_FILLED_SVG;
-                btn.title = 'Remove bookmark';
-            }
-            saveBookmarks(bms);
-            updateBkHeaderBtn();
-        });
-    });
+    // Bookmark verse action buttons are rendered from VERSE_ACTIONS registry
+    // (see bottom of file). Handler lives in the registry's 'bookmark' entry.
 
     // -----------------------------------------------------------
     // Keyboard shortcuts
@@ -1005,124 +904,16 @@
         });
     }());
 
-    // Add highlight button to each verse's action strip
-    document.querySelectorAll('.verse').forEach(function (el) {
-        var actions = el.querySelector('.verse-actions');
-        if (!actions || typeof READER_BOOK === 'undefined') return;
-
-        var hlBtn = document.createElement('button');
-        hlBtn.className = 'va-btn va-highlight';
-        hlBtn.title = 'Highlight verse';
-        hlBtn.innerHTML = HL_SVG;
-        actions.appendChild(hlBtn);
-
-        hlBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            // Remove any existing picker
-            var existing = document.querySelector('.hl-color-picker');
-            if (existing) existing.remove();
-
-            var key = hlKey(el.dataset.verse);
-            var hls = loadHighlights();
-            var current = hls[key] || null;
-
-            // If already highlighted, single click removes it
-            if (current) {
-                delete hls[key];
-                applyHighlight(el, null);
-                hlBtn.classList.remove('va-hl-active');
-                saveHighlights(hls);
-                return;
-            }
-
-            // Show color picker
-            var picker = document.createElement('span');
-            picker.className = 'hl-color-picker';
-            picker.addEventListener('click', function (ev) { ev.stopPropagation(); });
-            HL_COLORS.forEach(function (color) {
-                var dot = document.createElement('button');
-                dot.className = 'hl-dot hl-dot-' + color;
-                dot.title = color.charAt(0).toUpperCase() + color.slice(1);
-                dot.addEventListener('click', function (ev) {
-                    ev.stopPropagation();
-                    hls[key] = color;
-                    applyHighlight(el, color);
-                    hlBtn.classList.add('va-hl-active');
-                    saveHighlights(hls);
-                    picker.remove();
-                });
-                picker.appendChild(dot);
-            });
-            hlBtn.parentNode.appendChild(picker);
-
-            // Dismiss on outside click
-            setTimeout(function () {
-                document.addEventListener('click', function _dismiss() {
-                    picker.remove();
-                    document.removeEventListener('click', _dismiss);
-                }, { once: true });
-            }, 0);
-        });
-
-        // Set initial state
-        var hls = loadHighlights();
-        if (hls[hlKey(el.dataset.verse)]) hlBtn.classList.add('va-hl-active');
-    });
-
-    // Add highlight color row to mobile action sheet
+    // Highlight action rendering is handled by the VERSE_ACTIONS registry
+    // (see bottom of file) — renderDesktop/renderMobile on the 'highlight'
+    // entry. The init loop below just restores .va-hl-active state on load.
     (function () {
-        var vasHlRow = document.createElement('div');
-        vasHlRow.className = 'vas-hl-row';
-        vasHlRow.innerHTML = '<span class="vas-hl-label">' + HL_SVG + ' Highlight</span>';
-
-        var dotsWrap = document.createElement('span');
-        dotsWrap.className = 'vas-hl-dots';
-
-        HL_COLORS.forEach(function (color) {
-            var dot = document.createElement('button');
-            dot.className = 'vas-hl-dot vas-hl-dot-' + color;
-            dot.dataset.color = color;
-            dot.title = color.charAt(0).toUpperCase() + color.slice(1);
-            dot.addEventListener('click', function () {
-                var sel = _vasActiveVerse || document.querySelector('.verse-selected') || selectedVerse;
-                if (!sel) { closeVasSheet(); return; }
-                var key = hlKey(sel.dataset.verse);
-                var hls = loadHighlights();
-                if (hls[key] === color) {
-                    delete hls[key];
-                    applyHighlight(sel, null);
-                } else {
-                    hls[key] = color;
-                    applyHighlight(sel, color);
-                }
-                saveHighlights(hls);
-                closeVasSheet();
-            });
-            dotsWrap.appendChild(dot);
+        if (typeof READER_BOOK === 'undefined') return;
+        var hls = loadHighlights();
+        document.querySelectorAll('.verse').forEach(function (el) {
+            // va-hl-active class is added after population in populateVerseActions
+            el.dataset._hlState = hls[hlKey(el.dataset.verse)] ? '1' : '';
         });
-
-        // Add remove button
-        var removeDot = document.createElement('button');
-        removeDot.className = 'vas-hl-dot vas-hl-dot-remove';
-        removeDot.title = 'Remove highlight';
-        removeDot.innerHTML = '&times;';
-        removeDot.addEventListener('click', function () {
-            var sel = _vasActiveVerse || document.querySelector('.verse-selected') || selectedVerse;
-            if (!sel) { closeVasSheet(); return; }
-            var key = hlKey(sel.dataset.verse);
-            var hls = loadHighlights();
-            delete hls[key];
-            applyHighlight(sel, null);
-            saveHighlights(hls);
-            closeVasSheet();
-        });
-        dotsWrap.appendChild(removeDot);
-
-        vasHlRow.appendChild(dotsWrap);
-        var vasCancel = document.getElementById('vasCancel');
-        if (vasCancel && vasCancel.parentNode) {
-            vasCancel.parentNode.insertBefore(vasHlRow, vasCancel);
-        }
     }());
 
     // -----------------------------------------------------------
@@ -1157,43 +948,8 @@
         });
     }());
 
-    // Add note button to desktop action strip
-    document.querySelectorAll('.verse').forEach(function (el) {
-        var actions = el.querySelector('.verse-actions');
-        if (!actions || typeof READER_BOOK === 'undefined') return;
-
-        var noteBtn = document.createElement('button');
-        noteBtn.className = 'va-btn va-note';
-        noteBtn.title = 'Add note';
-        noteBtn.innerHTML = NOTE_SVG;
-        actions.appendChild(noteBtn);
-
-        var notes = loadNotes();
-        if (notes[hlKey(el.dataset.verse)]) noteBtn.classList.add('va-note-active');
-
-        noteBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            openNoteEditor(el);
-        });
-    });
-
-    // Add note to mobile action sheet
-    (function () {
-        var vasNote = document.createElement('button');
-        vasNote.className = 'vas-action-btn';
-        vasNote.id = 'vasNote';
-        vasNote.innerHTML = NOTE_SVG + ' Add Note';
-        var vasCancel = document.getElementById('vasCancel');
-        if (vasCancel && vasCancel.parentNode) {
-            vasCancel.parentNode.insertBefore(vasNote, vasCancel);
-        }
-        vasNote.addEventListener('click', function () {
-            var sel = _vasActiveVerse || document.querySelector('.verse-selected') || selectedVerse;
-            if (!sel) { closeVasSheet(); return; }
-            closeVasSheet();
-            setTimeout(function () { openNoteEditor(sel); }, 200);
-        });
-    }());
+    // Add note action buttons are rendered from VERSE_ACTIONS registry
+    // (see bottom of file). Handler lives in the registry's 'note' entry.
 
     function openNoteEditor(verseEl) {
         var existing = document.getElementById('noteEditor');
@@ -1727,6 +1483,283 @@
         themeBtn.parentNode.insertBefore(btn, themeBtn);
         btn.addEventListener('click', openSyncModal);
     })();
+
+    // -----------------------------------------------------------
+    // VERSE_ACTIONS — canonical contract for all verse actions.
+    // Both the desktop hover strip and the mobile action sheet render from
+    // this single registry. To add, rename, reorder, or remove an action,
+    // edit only this array. Label drift between mobile and desktop is
+    // impossible by construction.
+    //
+    //   id           — used for CSS class (va-<id>) and mobile button id
+    //   label        — canonical user-facing string (used both places)
+    //   icon         — SVG string
+    //   run(el)      — click handler (verse element passed in)
+    //   requiresBook — skip on index page (no READER_BOOK)
+    //   stateful     — if true, provide state(el) → {icon, label}; icon
+    //                  refreshes after run and in mobile sheet on open
+    //   extraClass   — optional fn(el) returning extra class for desktop btn
+    //   mobileRun    — optional override for mobile (e.g. async note editor)
+    //   custom       — skip auto-render (action renders its own UI; still
+    //                  listed here so the full action set is visible)
+    // -----------------------------------------------------------
+    var VERSE_ACTIONS = [
+        {
+            id: 'copy',
+            label: 'Copy verse',
+            icon: COPY_SVG,
+            run: function (el) {
+                copyText(getVerseText(el) + '\n— ' + getVerseRef(el.dataset.verse));
+            }
+        },
+        {
+            id: 'share',
+            label: 'Share verse',
+            icon: SHARE_SVG,
+            run: function (el) {
+                var vn = el.dataset.verse;
+                var text = '"' + getVerseText(el) + '"\n— ' + getVerseRef(vn);
+                var url  = getVerseUrl(vn);
+                if (navigator.share) {
+                    navigator.share({ title: getVerseRef(vn), text: text, url: url }).catch(function(){});
+                } else {
+                    copyText(text + '\n' + url);
+                }
+            }
+        },
+        {
+            id: 'image',
+            label: 'Share as image',
+            icon: IMAGE_SVG,
+            run: function (el) { shareVerseImage(el); }
+        },
+        {
+            id: 'bookmark',
+            label: 'Bookmark verse',
+            icon: BK_EMPTY_SVG,
+            requiresBook: true,
+            stateful: true,
+            state: function (el) {
+                return el.classList.contains('verse-bookmarked')
+                    ? { icon: BK_FILLED_SVG, label: 'Remove bookmark' }
+                    : { icon: BK_EMPTY_SVG, label: 'Bookmark verse' };
+            },
+            run: function (el) {
+                var vn = el.dataset.verse;
+                var key = bkKey(vn);
+                var bms = loadBookmarks();
+                var idx = bms.findIndex(function (b) { return b.key === key; });
+                if (idx > -1) {
+                    bms.splice(idx, 1);
+                    el.classList.remove('verse-bookmarked');
+                } else {
+                    bms.unshift({ key: key, ref: getVerseRef(vn), text: getVerseText(el), url: getVerseUrl(vn) });
+                    el.classList.add('verse-bookmarked');
+                }
+                saveBookmarks(bms);
+                updateBkHeaderBtn();
+            }
+        },
+        {
+            id: 'highlight',
+            label: 'Highlight verse',
+            icon: HL_SVG,
+            requiresBook: true,
+            // Highlight has custom UI (inline color picker on desktop, color
+            // row on mobile) instead of a single click handler. Registry
+            // populator delegates to these renderers.
+            custom: true,
+            renderDesktop: function (el, actions) {
+                var hlBtn = document.createElement('button');
+                hlBtn.className = 'va-btn va-highlight';
+                hlBtn.title = 'Highlight verse';
+                hlBtn.innerHTML = HL_SVG;
+                if (el.dataset._hlState === '1') hlBtn.classList.add('va-hl-active');
+                actions.appendChild(hlBtn);
+
+                hlBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var existing = document.querySelector('.hl-color-picker');
+                    if (existing) existing.remove();
+                    var key = hlKey(el.dataset.verse);
+                    var hls = loadHighlights();
+                    var current = hls[key] || null;
+                    if (current) {
+                        delete hls[key];
+                        applyHighlight(el, null);
+                        hlBtn.classList.remove('va-hl-active');
+                        saveHighlights(hls);
+                        return;
+                    }
+                    var picker = document.createElement('span');
+                    picker.className = 'hl-color-picker';
+                    picker.addEventListener('click', function (ev) { ev.stopPropagation(); });
+                    HL_COLORS.forEach(function (color) {
+                        var dot = document.createElement('button');
+                        dot.className = 'hl-dot hl-dot-' + color;
+                        dot.title = color.charAt(0).toUpperCase() + color.slice(1);
+                        dot.addEventListener('click', function (ev) {
+                            ev.stopPropagation();
+                            hls[key] = color;
+                            applyHighlight(el, color);
+                            hlBtn.classList.add('va-hl-active');
+                            saveHighlights(hls);
+                            picker.remove();
+                        });
+                        picker.appendChild(dot);
+                    });
+                    hlBtn.parentNode.appendChild(picker);
+                    setTimeout(function () {
+                        document.addEventListener('click', function _dismiss() {
+                            picker.remove();
+                            document.removeEventListener('click', _dismiss);
+                        }, { once: true });
+                    }, 0);
+                });
+            },
+            renderMobile: function (anchor) {
+                var vasHlRow = document.createElement('div');
+                vasHlRow.className = 'vas-hl-row';
+                vasHlRow.innerHTML = '<span class="vas-hl-label">' + HL_SVG + ' Highlight verse</span>';
+                var dotsWrap = document.createElement('span');
+                dotsWrap.className = 'vas-hl-dots';
+                HL_COLORS.forEach(function (color) {
+                    var dot = document.createElement('button');
+                    dot.className = 'vas-hl-dot vas-hl-dot-' + color;
+                    dot.dataset.color = color;
+                    dot.title = color.charAt(0).toUpperCase() + color.slice(1);
+                    dot.addEventListener('click', function () {
+                        var sel = _vasActiveVerse || document.querySelector('.verse-selected') || selectedVerse;
+                        if (!sel) { closeVasSheet(); return; }
+                        var key = hlKey(sel.dataset.verse);
+                        var hls = loadHighlights();
+                        if (hls[key] === color) {
+                            delete hls[key];
+                            applyHighlight(sel, null);
+                        } else {
+                            hls[key] = color;
+                            applyHighlight(sel, color);
+                        }
+                        saveHighlights(hls);
+                        closeVasSheet();
+                    });
+                    dotsWrap.appendChild(dot);
+                });
+                var removeDot = document.createElement('button');
+                removeDot.className = 'vas-hl-dot vas-hl-dot-remove';
+                removeDot.title = 'Remove highlight';
+                removeDot.innerHTML = '&times;';
+                removeDot.addEventListener('click', function () {
+                    var sel = _vasActiveVerse || document.querySelector('.verse-selected') || selectedVerse;
+                    if (!sel) { closeVasSheet(); return; }
+                    var key = hlKey(sel.dataset.verse);
+                    var hls = loadHighlights();
+                    delete hls[key];
+                    applyHighlight(sel, null);
+                    saveHighlights(hls);
+                    closeVasSheet();
+                });
+                dotsWrap.appendChild(removeDot);
+                vasHlRow.appendChild(dotsWrap);
+                anchor.parentNode.insertBefore(vasHlRow, anchor);
+            }
+        },
+        {
+            id: 'note',
+            label: 'Add note',
+            icon: NOTE_SVG,
+            requiresBook: true,
+            extraClass: function (el) {
+                var notes = loadNotes();
+                return notes[hlKey(el.dataset.verse)] ? 'va-note-active' : '';
+            },
+            run: function (el) { openNoteEditor(el); },
+            mobileRun: function (el) {
+                // Delay so the sheet's close animation doesn't collide with the modal
+                setTimeout(function () { openNoteEditor(el); }, 200);
+            }
+        }
+    ];
+
+    function populateVerseActions() {
+        // Desktop: populate each verse's .verse-actions container
+        document.querySelectorAll('.verse').forEach(function (el) {
+            var actions = el.querySelector('.verse-actions');
+            if (!actions) return;
+            VERSE_ACTIONS.forEach(function (action) {
+                if (action.requiresBook && typeof READER_BOOK === 'undefined') return;
+                if (action.custom) {
+                    if (action.renderDesktop) action.renderDesktop(el, actions);
+                    return;
+                }
+                var btn = document.createElement('button');
+                btn.className = 'va-btn va-' + action.id;
+                if (action.extraClass) {
+                    var ec = action.extraClass(el);
+                    if (ec) btn.className += ' ' + ec;
+                }
+                var st = action.stateful ? action.state(el) : { icon: action.icon, label: action.label };
+                btn.title = st.label;
+                btn.innerHTML = st.icon;
+                actions.appendChild(btn);
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    action.run(el);
+                    if (action.stateful) {
+                        var ns = action.state(el);
+                        btn.title = ns.label;
+                        btn.innerHTML = ns.icon;
+                    } else {
+                        flashDone(btn, action.icon);
+                    }
+                });
+            });
+        });
+
+        // Mobile: populate the action sheet once (before vasCancel)
+        VERSE_ACTIONS.forEach(function (action) {
+            if (action.requiresBook && typeof READER_BOOK === 'undefined') return;
+            if (!vasCancel || !vasCancel.parentNode) return;
+            if (action.custom) {
+                if (action.renderMobile) action.renderMobile(vasCancel);
+                return;
+            }
+            var btn = document.createElement('button');
+            btn.className = 'vas-action-btn';
+            btn.id = 'vas_' + action.id;
+            btn.innerHTML = action.icon + ' ' + action.label;
+            vasCancel.parentNode.insertBefore(btn, vasCancel);
+            btn.addEventListener('click', function () {
+                var sel = _vasActiveVerse || document.querySelector('.verse-selected') || selectedVerse;
+                if (!sel) { closeVasSheet(); return; }
+                closeVasSheet();
+                (action.mobileRun || action.run)(sel);
+                // Keep desktop button state in sync if stateful
+                if (action.stateful) {
+                    var dBtn = sel.querySelector('.va-' + action.id);
+                    if (dBtn) {
+                        var ns = action.state(sel);
+                        dBtn.title = ns.label;
+                        dBtn.innerHTML = ns.icon;
+                    }
+                }
+            });
+        });
+    }
+
+    // Refresh mobile sheet stateful button labels for the given verse.
+    // Called by openVasSheet before showing the sheet.
+    function refreshVerseActionsState(verseEl) {
+        VERSE_ACTIONS.forEach(function (action) {
+            if (!action.stateful || action.custom) return;
+            var btn = document.getElementById('vas_' + action.id);
+            if (!btn) return;
+            var s = action.state(verseEl);
+            btn.innerHTML = s.icon + ' ' + s.label;
+        });
+    }
+
+    populateVerseActions();
 
     // -----------------------------------------------------------
     // Service Worker registration (offline support)
