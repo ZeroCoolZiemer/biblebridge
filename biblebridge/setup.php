@@ -256,12 +256,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if ($adminToken): ?>
         <div class="success-box" style="background:#eff6ff; border-color:#bfdbfe;">
             <p style="color:#1e40af;">Bookmark this link to manage your reader settings:</p>
-            <a href="<?= $baseUrl ?>/settings?token=<?= urlencode($adminToken) ?>" class="api-key-display" style="display:block; text-decoration:none; color:#1e40af;"><?= htmlspecialchars($baseUrl) ?>/settings?token=<?= htmlspecialchars($adminToken) ?></a>
+            <a href="<?= htmlspecialchars($baseUrl, ENT_QUOTES, 'UTF-8') ?>/settings?token=<?= urlencode($adminToken) ?>" class="api-key-display" style="display:block; text-decoration:none; color:#1e40af;"><?= htmlspecialchars($baseUrl, ENT_QUOTES, 'UTF-8') ?>/settings?token=<?= htmlspecialchars($adminToken, ENT_QUOTES, 'UTF-8') ?></a>
             <div class="tier-info">This is your private admin link. Do not share it publicly.</div>
         </div>
         <?php endif; ?>
 
-        <a href="<?= $baseUrl ?>/read" class="btn-primary">Open Your Reader &rarr;</a>
+        <a href="<?= htmlspecialchars($baseUrl, ENT_QUOTES, 'UTF-8') ?>/read" class="btn-primary">Open Your Reader &rarr;</a>
 
         <button type="button" class="btn-secondary" onclick="claimRedirect('signup')" style="width:100%;cursor:pointer;margin-top:0.5rem;">Upgrade for Unlimited Access</button>
 

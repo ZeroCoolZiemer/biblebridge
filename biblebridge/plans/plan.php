@@ -21,7 +21,7 @@ $canonicalUrl = $siteUrl . $bbBaseUrl . '/plans/' . $slug;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle) ?></title>
     <meta name="description" content="<?= htmlspecialchars($plan['description']) ?>">
-    <link rel="canonical" href="<?= $canonicalUrl ?>">
+    <link rel="canonical" href="<?= htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8') ?>">
     <link rel="stylesheet" href="<?= $bbBaseUrl ?>/assets/fonts/fonts.css">
     <link rel="stylesheet" href="<?= $bbBaseUrl ?>/assets/reader.min.css?v=20260401">
     <link rel="icon" type="image/svg+xml" href="<?= $bbBaseUrl ?>/favicon.svg">

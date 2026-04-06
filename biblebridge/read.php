@@ -111,10 +111,10 @@ $ntBooks = array_filter($sidebarBooks, fn($id) => $id >= 40, ARRAY_FILTER_USE_KE
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle) ?></title>
     <meta name="description" content="<?= htmlspecialchars($descSnippet) ?>">
-    <link rel="canonical" href="<?= $canonicalUrl ?>">
+    <link rel="canonical" href="<?= htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8') ?>">
     <meta property="og:title" content="<?= htmlspecialchars($pageTitle) ?>">
     <meta property="og:description" content="<?= htmlspecialchars($descSnippet) ?>">
-    <meta property="og:url" content="<?= $canonicalUrl ?>">
+    <meta property="og:url" content="<?= htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8') ?>">
     <meta property="og:type" content="website">
     <link rel="stylesheet" href="<?= $bbBaseUrl ?>/assets/fonts/fonts.css">
     <link rel="stylesheet" href="<?= $bbBaseUrl ?>/assets/reader.min.css?v=20260401">
