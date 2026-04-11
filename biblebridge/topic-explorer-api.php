@@ -199,8 +199,11 @@ if (!empty($slug)) {
                 <?php if ($av['text']): ?>
                 <p class="te-anchor-text">&ldquo;<?= htmlspecialchars($av['text']) ?>&rdquo;</p>
                 <?php endif; ?>
-                <a href="<?= $bbBaseUrl ?>/read/<?= $av['slug'] ?>/<?= $av['chapter'] ?>/<?= $av['verse'] ?>" class="te-anchor-context">Read in context &rarr;</a>
-                <button type="button" class="te-anchor-xref" data-bb-xref-ref="<?= htmlspecialchars($av['ref']) ?>">Cross-references</button>
+                <button type="button" class="te-anchor-expand" data-bb-context-ref="<?= htmlspecialchars($av['ref']) ?>">Expand context</button>
+                <div class="te-anchor-utils">
+                    <a href="<?= $bbBaseUrl ?>/read/<?= $av['slug'] ?>/<?= $av['chapter'] ?>/<?= $av['verse'] ?>" class="te-anchor-context">Read in context</a>
+                    <button type="button" class="te-anchor-xref" data-bb-xref-ref="<?= htmlspecialchars($av['ref']) ?>">Cross-references</button>
+                </div>
             </div>
             <?php endforeach; ?>
         </div>
@@ -217,8 +220,11 @@ if (!empty($slug)) {
                 <?php if ($av['text']): ?>
                 <p class="te-anchor-text">&ldquo;<?= htmlspecialchars($av['text']) ?>&rdquo;</p>
                 <?php endif; ?>
-                <a href="<?= $bbBaseUrl ?>/read/<?= $av['slug'] ?>/<?= $av['chapter'] ?>/<?= $av['verse'] ?>" class="te-anchor-context">Read in context &rarr;</a>
-                <button type="button" class="te-anchor-xref" data-bb-xref-ref="<?= htmlspecialchars($av['ref']) ?>">Cross-references</button>
+                <button type="button" class="te-anchor-expand" data-bb-context-ref="<?= htmlspecialchars($av['ref']) ?>">Expand context</button>
+                <div class="te-anchor-utils">
+                    <a href="<?= $bbBaseUrl ?>/read/<?= $av['slug'] ?>/<?= $av['chapter'] ?>/<?= $av['verse'] ?>" class="te-anchor-context">Read in context</a>
+                    <button type="button" class="te-anchor-xref" data-bb-xref-ref="<?= htmlspecialchars($av['ref']) ?>">Cross-references</button>
+                </div>
             </div>
             <?php endforeach; ?>
         </div>
@@ -318,6 +324,14 @@ if (!empty($slug)) {
 </script>
 <script src="<?= $bbBaseUrl ?>/assets/xref-walker.js?v=20260409h"></script>
 <script src="<?= $bbBaseUrl ?>/assets/topic-tools.js?v=20260409h"></script>
+<script>
+    window.BB_CONTEXT_CONFIG = {
+        endpoint: '<?= $bbBaseUrl ?>/context-proxy.php?',
+        version: 'kjv',
+        window: 2
+    };
+</script>
+<script src="<?= $bbBaseUrl ?>/assets/topic-context.js?v=20260411"></script>
 <?php endif; ?>
 </body>
 </html>
