@@ -108,8 +108,8 @@ $canonicalUrl = $siteUrl . $bbBaseUrl . '/plans/' . $slug . '/day/' . $dayNum;
         .reading-section { margin-bottom: 3rem; }
         .reading-section + .reading-section { padding-top: 2rem; border-top: 1px solid var(--border-light); }
         .section-heading { font-family: 'Lora', Georgia, serif; font-size: 1.25rem; font-weight: 500; color: var(--text-primary); margin-bottom: 1.25rem; }
-        .verses-block .verse { font-family: 'Lora', Georgia, serif; font-size: 1.1rem; line-height: 1.9; color: var(--text-primary); margin-bottom: 0; padding: 0.3rem 0; }
-        .verses-block .verse .vnum { font-family: 'Inter', sans-serif; font-size: 0.65em; font-weight: 600; color: var(--text-muted); vertical-align: super; margin-right: 0.2em; user-select: none; }
+        .plan-verse { font-family: 'Lora', Georgia, serif; font-size: 1.1rem; line-height: 1.9; color: var(--text-primary); margin-bottom: 0; padding: 0.3rem 0; }
+        .plan-verse .vnum { font-family: 'Inter', sans-serif; font-size: 0.65em; font-weight: 600; color: var(--text-muted); vertical-align: super; margin-right: 0.2em; user-select: none; }
         .day-complete-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 210; background: var(--bg-card); border-top: 1px solid var(--border-light); padding: 0.9rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; box-shadow: 0 -4px 16px rgba(0,0,0,0.07); opacity: 0; transform: translateY(100%); transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; }
         .day-complete-bar.shown { opacity: 1; transform: translateY(0); pointer-events: auto; }
         .day-complete-bar-left { font-family: 'Inter', sans-serif; font-size: 0.83rem; color: var(--text-secondary); }
@@ -188,7 +188,7 @@ $canonicalUrl = $siteUrl . $bbBaseUrl . '/plans/' . $slug . '/day/' . $dayNum;
             <?php if (!empty($section['verses'])): ?>
             <div class="verses-block">
                 <?php foreach ($section['verses'] as $v): ?>
-                <p class="verse">
+                <p class="plan-verse">
                     <sup class="vnum"><?= (int)$v['verse'] ?></sup><?= htmlspecialchars($v['text']) ?>
                 </p>
                 <?php endforeach; ?>

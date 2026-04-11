@@ -7,46 +7,6 @@
  */
 
 /**
- * Detect if the current request is from a real browser (not a bot/crawler).
- * Used to generate a human-verification token so only real page views count
- * toward the site's daily API quota.
- */
-function bb_is_human_request(): bool
-{
-    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
-    if ($ua === '') return false;
-
-    // Common bot patterns
-    $botPatterns = [
-        'bot', 'crawl', 'spider', 'slurp', 'wget', 'curl',
-        'python', 'java/', 'httpclient', 'fetcher', 'scraper',
-        'headless', 'phantom', 'lighthouse', 'pagespeed',
-        'semrush', 'ahrefs', 'mj12bot', 'dotbot', 'petalbot',
-        'yandex', 'baiduspider', 'duckduck', 'facebookexternal',
-        'twitterbot', 'linkedinbot', 'whatsapp', 'telegram',
-        'applebot', 'ia_archiver', 'archive.org',
-    ];
-
-    $uaLower = strtolower($ua);
-    foreach ($botPatterns as $pattern) {
-        if (str_contains($uaLower, $pattern)) return false;
-    }
-
-    return true;
-}
-
-/**
- * Generate the human-verification token for API requests.
- * Token = HMAC-SHA256(today's date, api_key).
- * API only counts quota when this token is present and valid.
- */
-function bb_human_token(): string
-{
-    global $bbInstall;
-    return hash_hmac('sha256', date('Y-m-d'), $bbInstall['api_key']);
-}
-
-/**
  * Make a GET request to the BibleBridge API.
  *
  * @param string $endpoint  e.g. '/scripture', '/cross-references', '/topics'
@@ -65,17 +25,10 @@ function bb_api_get(string $endpoint, array $params = []): ?array
         $url .= '?' . http_build_query($params);
     }
 
-    $headers = "X-API-Key: {$bbInstall['api_key']}\r\nAccept: application/json\r\nX-BB-Client: standalone\r\n";
-
-    // Only send human token for real browser requests — bots get served but don't burn quota
-    if (bb_is_human_request()) {
-        $headers .= "X-BB-Human: " . bb_human_token() . "\r\n";
-    }
-
     $ctx = stream_context_create([
         'http' => [
             'method'  => 'GET',
-            'header'  => $headers,
+            'header'  => "X-API-Key: {$bbInstall['api_key']}\r\nAccept: application/json\r\n",
             'timeout' => 8,
             'ignore_errors' => true,
         ],
@@ -159,8 +112,29 @@ function bb_api_xrefs(string $reference, string $version = 'kjv', int $limit = 8
 {
     $data = bb_api_get('/cross-references', [
         'reference' => $reference,
-        'version'   => $version,
+        'v'         => $version,
         'limit'     => $limit,
+    ]);
+
+    if (bb_is_rate_limited($data)) {
+        $GLOBALS['bb_api_rate_limited'] = true;
+        $GLOBALS['bb_api_rate_reason'] = $data['reason'] ?? 'quota';
+    }
+
+    return $data;
+}
+
+/**
+ * Fetch surrounding context for a verse from the API.
+ *
+ * @return array|null  Full API response
+ */
+function bb_api_context(string $reference, string $version = 'kjv', int $window = 2): ?array
+{
+    $data = bb_api_get('/context', [
+        'reference' => $reference,
+        'version'   => $version,
+        'window'    => $window,
     ]);
 
     if (bb_is_rate_limited($data)) {
@@ -176,18 +150,13 @@ function bb_api_xrefs(string $reference, string $version = 'kjv', int $limit = 8
  *
  * @return array|null  Full API response
  */
-function bb_api_search(string $query, string $version = 'kjv', int $page = 1, int $limit = 25, int $bookFilter = 0): ?array
+function bb_api_search(string $query, string $version = 'kjv', int $page = 1): ?array
 {
-    $params = [
+    $data = bb_api_get('/search', [
         'search'  => $query,
         'version' => $version,
-        'limit'   => $limit,
-        'page'    => $page,
-    ];
-    if ($bookFilter > 0) {
-        $params['book_id'] = $bookFilter;
-    }
-    $data = bb_api_get('/search', $params);
+        'limit'   => 25,
+    ]);
 
     if (bb_is_rate_limited($data)) {
         $GLOBALS['bb_api_rate_limited'] = true;

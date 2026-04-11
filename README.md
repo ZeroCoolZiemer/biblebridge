@@ -1,6 +1,7 @@
 # BibleBridge
 
 [![Semgrep](https://github.com/ZeroCoolZiemer/biblebridge/actions/workflows/semgrep.yml/badge.svg)](https://github.com/ZeroCoolZiemer/biblebridge/actions/workflows/semgrep.yml)
+[![Last commit](https://img.shields.io/github/last-commit/ZeroCoolZiemer/biblebridge)](https://github.com/ZeroCoolZiemer/biblebridge/commits/main)
 
 A complete Bible website in one small PHP upload.
 
