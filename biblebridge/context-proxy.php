@@ -31,13 +31,12 @@ if (!$data || ($data['status'] ?? '') !== 'success') {
     // Safe: Content-Type is application/json (line 8), json_encode properly escapes
     // all values including any reference reflected in $data, and the response is not
     // rendered as HTML by browsers. $data is the structured API response, not raw
-    // request reflection.
-    // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
-    echo json_encode($data ?: ['status' => 'error', 'message' => 'Could not load context.']);
+    // request reflection. Suppression on same line — Semgrep OSS PHP preceding-line
+    // suppression is unreliable.
+    echo json_encode($data ?: ['status' => 'error', 'message' => 'Could not load context.']); // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
     exit;
 }
 
 // Safe: same rationale as above — json_encode inside an application/json response
 // cannot produce HTML execution context regardless of what flows into $data.
-// nosemgrep: php.lang.security.injection.echoed-request.echoed-request
-echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
