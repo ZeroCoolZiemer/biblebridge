@@ -85,6 +85,8 @@ The full Bible website installs in under 1 MB.
 1. `git clone https://github.com/ZeroCoolZiemer/biblebridge.git`
 2. Upload the folder to your web host
 
+**WordPress:** Also available as a [WordPress plugin](https://wordpress.org/plugins/biblebridge/).
+
 **Then:**
 3. Upload into its own folder on your host (e.g. `yoursite.com/biblebridge/`) — don't merge it into your site root
 4. Visit `yoursite.com/biblebridge/setup` — type a name and you're done
