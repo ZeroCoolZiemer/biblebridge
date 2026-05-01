@@ -1,6 +1,5 @@
 # BibleBridge
 
-[![Semgrep](https://github.com/ZeroCoolZiemer/biblebridge/actions/workflows/semgrep.yml/badge.svg)](https://github.com/ZeroCoolZiemer/biblebridge/actions/workflows/semgrep.yml)
 [![Last commit](https://img.shields.io/github/last-commit/ZeroCoolZiemer/biblebridge)](https://github.com/ZeroCoolZiemer/biblebridge/commits/main)
 
 A complete Bible website in one small PHP upload.
@@ -71,6 +70,7 @@ Upload one small PHP package, visit `/setup`, and your website instantly has:
 - Verse sharing (text and image cards)
 - Offline chapter caching
 - Automatic remote updates
+- 9 color themes — choose accent and navigation colors in settings
 - Dark mode and mobile support
 
 The full Bible website installs in under 1 MB.
