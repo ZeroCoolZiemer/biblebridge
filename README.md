@@ -2,29 +2,17 @@
 
 [![Last commit](https://img.shields.io/github/last-commit/ZeroCoolZiemer/biblebridge)](https://github.com/ZeroCoolZiemer/biblebridge/commits/main)
 
-A complete Bible website in one small PHP upload.
+A complete Bible for your WordPress site — Scripture Atlas, cross-references, reading plans, KJV and BSB.
 
-Try it risk-free in under a minute. Upload the zip, visit `/setup`, type a name, and your Bible website is live. If it's not for you, delete the folder — nothing changes. Works on standard shared hosting with PHP 7.4+.
-
-You can have your Bible website live before you finish your cup of coffee.
-
-[Live Demo](https://holybible.dev/read) · [Download](https://holybible.dev/pricing) · [Install Guide](https://holybible.dev/blog/add-bible-to-church-website)
+[Live Demo](https://holybible.dev/wp/bible/read) · [Install on WordPress](https://wordpress.org/plugins/biblebridge/) · [Pricing](https://holybible.dev/pricing)
 
 ![BibleBridge Reader](./screenshot.png)
 
-Beautiful typography, cross-references, topics, and reading plans in one lightweight PHP install.
+[![Interactive map of 96 Bible topics connected by the verses they share](./topic-map.png)](https://holybible.dev/wp/bible/scripture-atlas)
 
-![Global Mobile Performance](./lighthouse.png)
-
-94–99 mobile Lighthouse on real chapter pages across US, Europe, Asia, and Australia.
-
-[![Interactive map of 95 Bible topics connected by the verses they share](./topic-map.png)](https://holybible.dev/topics/map)
-
-95 topics connected by the verses they share — structural doctrine, Tier A study themes, and Tier B pastoral care. [Open the interactive map →](https://holybible.dev/topics/map)
+96 Bible topics connected by shared verses — from core doctrine to everyday Christian life. [Open Scripture Atlas →](https://holybible.dev/wp/bible/scripture-atlas)
 
 ---
-
-Perfect for church websites, ministries, Christian blogs, Bible study apps, and any PHP site that needs a complete Bible without rebuilding scripture infrastructure.
 
 ## Why most people never finish building this
 
@@ -42,96 +30,50 @@ So you normalize all of that. Then you need a second translation. Different sour
 
 Now you have clean data and a normalized database. You still need:
 
-- A reference parser that handles `John 3:16`, `1 Cor 13`, `Rev 21:1-4`, `Jn 3`, `1Cor13`, `Ps 23`, `Gén 1:1`, `Jean 3:16`, `Römer 8` — every abbreviation, shorthand, numbered book format, and foreign book name your users might type
-- Full-text search that actually feels instant across 31,000+ verses
-- Cross-references linking scripture across 66 books (and displaying them without overwhelming the reader)
+- A reference parser that handles `John 3:16`, `1 Cor 13`, `Rev 21:1-4`, `Jn 3`, `1Cor13`, `Ps 23` — every abbreviation, shorthand, and numbered book format your users might type
+- Full-text search that feels instant across 31,000+ verses
+- Cross-references linking scripture across 66 books
 - Reading plans with progress tracking and day-by-day navigation
 - Topic modeling that shows how theological ideas relate to each other
 - Bookmarks, highlights, notes, verse sharing, cloud sync, dark mode
-- Offline support, automatic updates, mobile layout, URL routing, page speed
+- Mobile layout, URL routing, page speed
 
 That's months of edge cases and data plumbing. Most projects stall somewhere between the database import and the reference parser.
 
 **You do not need to build any of this.**
 
-BibleBridge gives you 11 full Bible translations, cross-references, search, topics, and guided reading plans — already cleaned, normalized, and served through an API. No database on your end. No data imports. No parsing pilcrows at 2 AM.
+## What you get
 
-## What you get instead
+Install from your WordPress admin and your site has:
 
-Upload one small PHP package, visit `/setup`, and your website instantly has:
+- **Scripture Atlas** — 96 Bible topics connected by shared verses, from core doctrine to everyday Christian life
+- **Cross-references** — tap any verse to see related passages
+- **KJV and Berean Standard Bible (BSB)** — both public domain, both included on every plan
+- **5 reading plans** — Bible in a Year, NT in 90 Days, NT in a Year, Gospel of John, Psalms & Proverbs
+- **Full-text search** with book filtering
+- **Verse shortcodes** — `[biblebridge_verse ref="John 3:16"]` or `[biblebridge_verse ref="Romans 8:1" version="bsb"]`
+- **Verse of the day** — `[biblebridge_verse_of_the_day]`
+- Verse sharing, highlighting, and notes
+- Cloud sync across devices via a simple code (no account required)
+- Dark mode and mobile layout
 
-- 11 Bible translations, cleaned and normalized — customize which ones appear in settings
-- Smart verse and phrase search across 31,000+ verses
-- Cross-references with explanations of why verses relate
-- Guided reading plans with progress tracking
-- Topic Explorer with 89 connected theological paths
-- Notes, highlights, and bookmarks
-- Cloud sync with no login
-- Verse sharing (text and image cards)
-- Offline chapter caching
-- Automatic remote updates
-- 9 color themes — choose accent and navigation colors in settings
-- Dark mode and mobile support
-
-The full Bible website installs in under 1 MB.
+Every feature is included on every plan, including free.
 
 ## Install
 
-**Option A — Download**
-1. [Download the latest release](https://holybible.dev/pricing)
-2. Upload to your web host
+1. In your WordPress admin, go to **Plugins → Add New**
+2. Search for "BibleBridge" and click **Install Now**
+3. Activate the plugin
+4. Go to **Settings → BibleBridge** to set your reader name
+5. Find your reader URL under **Page URL** in Settings and add it to your navigation menu
 
-**Option B — Clone**
-1. `git clone https://github.com/ZeroCoolZiemer/biblebridge.git`
-2. Upload the folder to your web host
+A free API key is provisioned automatically on activation — no signup required.
 
-**Then:**
-3. Upload into its own folder on your host (e.g. `yoursite.com/biblebridge/`) — don't merge it into your site root
-4. Visit `yoursite.com/biblebridge/setup` — type a name and you're done
-5. Your Bible website is live
+[Install on WordPress.org →](https://wordpress.org/plugins/biblebridge/)
 
-Everything connects automatically — no signup, no API keys, no configuration. When your church grows, upgrade for higher limits.
+## Source code
 
-Also available as a [WordPress plugin](https://wordpress.org/plugins/biblebridge/).
-
-### Requirements
-
-- PHP 7.4+
-- `mbstring` extension (most hosts have this — a polyfill is included as fallback)
-- `mod_rewrite` (Apache) or equivalent URL rewriting
-- Outbound HTTPS allowed
-- No database required
-
-## FAQ
-
-**Does it work on shared hosting?**
-Yes, if your host supports PHP 7.4+, mod_rewrite, and outbound HTTPS. Most do — check with your provider if you're unsure.
-
-**Do I need a database?**
-No. BibleBridge connects to the BibleBridge API for scripture data. Nothing to install or maintain on your end.
-
-**Is it free?**
-The free plan covers most small churches and personal sites. If your site grows, [affordable plans](https://holybible.dev/pricing) start at $9/month.
-
-## Troubleshooting
-
-**`/setup` returns 404?**
-Your host doesn't have `mod_rewrite` enabled. Try visiting `yoursite.com/biblebridge/setup.php` directly instead. If that works, ask your host to enable URL rewriting.
-
-**Blank page after install?**
-Check that your PHP version is 7.4+. Check your host's error log for details.
-
-**`mbstring` error on install?**
-A polyfill is bundled as a fallback, but enabling the native `mbstring` PHP extension is recommended. Most hosts have it — check your control panel or ask support.
-
-**Search not working?**
-Make sure your server can make outbound HTTPS requests. Some hosts block this by default.
-
-**Pages return 404 after the homepage loads?**
-BibleBridge needs `mod_rewrite` (Apache) or equivalent URL rewriting enabled.
-
-**Moved to a different folder?**
-Clear your browser cache. Old links may still point to the previous location.
+Every PHP, CSS, and JavaScript file ships as human-readable source in the plugin zip. No minification, no build step, no obfuscation. What you download is what runs.
 
 ## License
 
